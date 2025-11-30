@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   node: circleci/node@5.2
-  aws-cli: circleci/aws-cli@4.1.1
 
 jobs:
   test:
@@ -21,14 +20,15 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - aws-cli/install
       - run:
           name: Build project
           command: npm run build
       - run:
-          name: Deploy to S3
+          name: Deploy to Firebase Hosting
           command: |
-            aws s3 sync ./dist s3://todo-2025-fep-uninorte/ --delete --acl public-read
+            echo "$SA_KEY" > ${HOME}/gcloud-key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/gcloud-key.json
+            npx firebase deploy --only hosting --project "$FIREBASE_PROJECT_ID"
 
 workflows:
   test_and_deploy:
